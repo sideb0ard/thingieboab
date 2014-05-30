@@ -29,13 +29,11 @@ func tokenizer(bigstringy string) []string {
 func spaceify(dashy string) string {
 	spxex, _ := regexp.Compile("-")
 	spaceyString := strings.ToLower(spxex.ReplaceAllString(dashy, " "))
-	//fmt.Println("SPACEME CALLED! Sending back: " + spacyString)
 	return spaceyString
 }
 func dashify(spacey string) string {
 	spxex, _ := regexp.Compile(" ")
 	dashyString := strings.ToLower(spxex.ReplaceAllString(spacey, "-"))
-	//fmt.Println("DASHME CALLED! Sending back: " + dashyString)
 	return dashyString
 }
 func saveKnowledge(thing string, meaning string) {
@@ -56,7 +54,6 @@ func getKnowledge(q string) string {
 		fmt.Println(err)
 	}
 	defer c.Close()
-
 	rkey := "aigor:memory:" + q
 	r, err := redis.String(c.Do("GET", rkey))
 	if err != nil {
@@ -69,7 +66,6 @@ func getKnowledge(q string) string {
 	}
 }
 func getKeys(q string) []string {
-	fmt.Println("WOOP, IN GETKEYS")
 	var keys []string
 	c, err := redis.Dial("tcp", ":6379")
 	if err != nil {
@@ -77,28 +73,39 @@ func getKeys(q string) []string {
 	}
 	defer c.Close()
 
-	//key := "aigor:memory:" + q
-	fmt.Println("Q IS :" + q)
 	keys, err = redis.Strings(c.Do("KEYS", strings.ToLower(q)+"*"))
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(keys)
 	return keys
 }
 func getValue(k string) string {
-	//fmt.Println("WOOP, IN GET VALUE!")
 	c, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		fmt.Println(err)
 	}
 	defer c.Close()
 
-	//fmt.Println("Key IS :" + k)
 	v, err := redis.Bytes(c.Do("GET", k))
 	if err != nil {
 		fmt.Println(err)
 	}
-	//fmt.Println(v)
 	return string(v)
+}
+
+func understand(sentence string) []string {
+	var thing []string
+	statewurds := map[string]int{"am": 1, "is": 1, "are": 1, "was": 1, "were": 1, "will": 1}
+	var wurds = strings.Split(sentence, " ")
+	for w := range wurds {
+		_, ok := statewurds[wurds[w]]
+		if ok {
+			r := regexp.MustCompile(`(.*)\b` + wurds[w] + `\b(.*)`)
+			matches := r.FindAllStringSubmatch(sentence, -1)
+			thing = append(thing, matches[0][1])
+			thing = append(thing, matches[0][2])
+
+		}
+	}
+	return thing
 }

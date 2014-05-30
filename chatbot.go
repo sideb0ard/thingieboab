@@ -3,13 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
-	//"github.com/garyburd/redigo/redis"
 	"io"
 	"log"
 	"math/rand"
 	"os"
 	"regexp"
-	//"strconv"
 	"strings"
 )
 
@@ -22,7 +20,6 @@ func (b Bot) innit() {
 	for {
 		line, err := scanner.ReadBytes('\n')
 		if err == io.EOF {
-			//os.Exit(0)
 			break
 		}
 		if err != nil {
@@ -34,7 +31,6 @@ func (b Bot) innit() {
 		sline := strings.Split(strings.TrimRight(string(line), "\n"), "|")
 		entryType, keyWord, replacement := sline[0], sline[1], strings.Join(sline[2:], " ")
 		storageKey := b.name + ":" + entryType + ":" + keyWord
-		//fmt.Println(storageKey, replacement)
 		saveKnowledge(storageKey, replacement)
 	}
 }
@@ -65,18 +61,20 @@ func (b Bot) talkPerson() {
 
 	for {
 		line := listen()
-		//fmt.Println("LINE:", line)
-		//line = b.procsz(line, "pre")
-		//fmt.Println("PRELINE:", line)
+		line = b.procsz(line, "pre")
 
-		reply := getKnowledge(line)
-		fmt.Println("REPLY:", reply)
-		reply = b.procsz(reply, "post")
-		fmt.Println("POSTREPLY:", reply)
+		subject := understand(line)
+		var reply string
+		if len(subject) > 0 {
+			reply = "Oh, we talking about " + b.procsz(subject[0], "post") + "?"
+		} else {
+			reply = getValue("aigor:memory:" + line)
+		}
+
+		// reply = b.procsz(reply, "post")
 
 		if len(reply) == 0 {
 			b.mood -= 10
-			//fmt.Println("LAME - no REPLY!")
 			fmt.Printf("Sorry, i don't know what %v means - can you tell me?\n", line)
 			explanation := listen()
 			fmt.Printf("Thanks, so \"%v\" means \"%v\" - got it (i think!!)\n", line, explanation)
@@ -107,25 +105,18 @@ func (b Bot) procsz(s string, stage string) string {
 	prefix := strings.ToLower(b.name) + ":" + stage + ":"
 	fullkeys := getKeys(prefix)
 	re, _ := regexp.Compile(prefix + `(.*)`)
-	//fmt.Println(re)
 	keys := make(map[string]int)
 	for i := range fullkeys {
-		fmt.Println("YA", string(re.FindStringSubmatch(fullkeys[i])[1]))
-
 		keys[string(re.FindStringSubmatch(fullkeys[i])[1])] = 1
-		//fmt.Println(getValue(string(fullkeys[i])))
 	}
 	var wurds = strings.Split(s, " ")
-	fmt.Println("INIT WURDS: ", s)
 	for w := range wurds {
 		_, ok := keys[wurds[w]]
 		if ok {
-			r := regexp.MustCompile(wurds[w])
+			r := regexp.MustCompile(`\b` + wurds[w] + `\b`)
 			s = r.ReplaceAllString(s, getValue(prefix+wurds[w]))
 
 		}
 	}
-	fmt.Println("RETURN WURDS: ", s)
-
 	return s
 }
