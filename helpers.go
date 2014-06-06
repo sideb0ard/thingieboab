@@ -54,7 +54,7 @@ func getKnowledge(q string) string {
 		fmt.Println(err)
 	}
 	defer c.Close()
-	rkey := "aigor:memory:" + q
+	rkey := "aigor:memory:" + strings.ToLower(q)
 	r, err := redis.String(c.Do("GET", rkey))
 	if err != nil {
 		fmt.Println(err)
@@ -86,26 +86,24 @@ func getValue(k string) string {
 	}
 	defer c.Close()
 
-	v, err := redis.Bytes(c.Do("GET", k))
-	if err != nil {
-		fmt.Println(err)
-	}
+	v, _ := redis.Bytes(c.Do("GET", strings.ToLower(k)))
 	return string(v)
 }
 
-func understand(sentence string) []string {
-	var thing []string
-	statewurds := map[string]int{"am": 1, "is": 1, "are": 1, "was": 1, "were": 1, "will": 1}
+func understand(sentence string) (string, string) {
+	// first check for pronouns, then local redis, then internet dictionary
+	var subject string
+	var action string
 	var wurds = strings.Split(sentence, " ")
 	for w := range wurds {
-		_, ok := statewurds[wurds[w]]
+		_, ok := pronouns[strings.ToLower(wurds[w])]
 		if ok {
-			r := regexp.MustCompile(`(.*)\b` + wurds[w] + `\b(.*)`)
+			r := regexp.MustCompile(`(?i)\b(` + wurds[w] + `)\b(.*)`)
 			matches := r.FindAllStringSubmatch(sentence, -1)
-			thing = append(thing, matches[0][1])
-			thing = append(thing, matches[0][2])
+			subject = matches[0][1]
+			action = matches[0][2]
 
 		}
 	}
-	return thing
+	return subject, action
 }

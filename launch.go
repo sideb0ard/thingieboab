@@ -24,7 +24,7 @@ func main() {
 	var b Bot
 	b.name = "AIGOR"
 	b.mood = 100
-	//b.innit()
+	b.innit()
 	b.talkPerson()
 	fmt.Println("nite nite.")
 }

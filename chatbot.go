@@ -4,35 +4,22 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
-	"math/rand"
+	//"io/ioutil"
+	//"log"
+	//"encoding/json"
+	//"math/rand"
 	"os"
 	"regexp"
 	"strings"
 )
 
+var pronouns map[string]int
+
+//var coordinators map[string]int
+
 func (b Bot) innit() {
-	file, err := os.Open("language.txt") // For read access.
-	if err != nil {
-		log.Fatal(err)
-	}
-	scanner := bufio.NewReader(file)
-	for {
-		line, err := scanner.ReadBytes('\n')
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			panic(err)
-		}
-		if match, _ := regexp.Match(`^#`, line); match == true {
-			continue
-		}
-		sline := strings.Split(strings.TrimRight(string(line), "\n"), "|")
-		entryType, keyWord, replacement := sline[0], sline[1], strings.Join(sline[2:], " ")
-		storageKey := b.name + ":" + entryType + ":" + keyWord
-		saveKnowledge(storageKey, replacement)
-	}
+	pronouns = b.convertRedisKey("pronoun")
+	//fmt.Println(pronouns)
 }
 
 func listen() string {
@@ -61,32 +48,44 @@ func (b Bot) talkPerson() {
 
 	for {
 		line := listen()
+		//fmt.Println("ORIG LINE IS ", line)
 		line = b.procsz(line, "pre")
+		//fmt.Println("PRE-PROCESSED LINE IS ", line)
 
-		subject := understand(line)
-		var reply string
+		//fmt.Println("POST-PROCESSED LINE IS ", line)
+		subject, action := understand(line)
+		//fmt.Println("SUBJECT:" + subject)
+
+		//subject = b.procsz(subject, "post")
+
 		if len(subject) > 0 {
-			reply = "Oh, we talking about " + b.procsz(subject[0], "post") + "?"
+			you := regexp.MustCompile(`(?i)\bi\b`)
+			matchedYou := you.MatchString(subject)
+			me := regexp.MustCompile(`(?i)\byou\b`)
+			matchedMe := me.MatchString(subject)
+			fmt.Println("MME :", matchedMe, " MYOU:", matchedYou)
+			action = b.procsz(action, "post")
+			if matchedMe {
+				fmt.Println("ITs ME!", b.name+", I"+action)
+			} else if matchedYou {
+				fmt.Println("ITs YOU!", p.name+", YOU"+action)
+			} else {
+				fmt.Println("Oh yeah, " + subject + ". Yeah, " + action)
+			}
 		} else {
-			reply = getValue("aigor:memory:" + line)
+			bangqregex := regexp.MustCompile(`[!?]`)
+			line = bangqregex.ReplaceAllString(line, "")
+			reply := getValue("aigor:memory:" + line)
+			if len(reply) > 0 {
+				fmt.Println(reply)
+			} else {
+				fmt.Printf("Sorry, i don't know what %v means - can you tell me?\n", line)
+				explanation := listen()
+				fmt.Printf("Thanks, so \"%v\" means \"%v\" - got it (i think!!)\n", line, explanation)
+				saveKnowledge(b.name+":memory:"+line, explanation)
+			}
 		}
 
-		// reply = b.procsz(reply, "post")
-
-		if len(reply) == 0 {
-			b.mood -= 10
-			fmt.Printf("Sorry, i don't know what %v means - can you tell me?\n", line)
-			explanation := listen()
-			fmt.Printf("Thanks, so \"%v\" means \"%v\" - got it (i think!!)\n", line, explanation)
-			saveKnowledge(b.name+":memory:"+line, explanation)
-		}
-		sayName := rand.Intn(4)
-		if sayName == 0 {
-			b.mood += 10
-			reply = p.name + ", " + reply
-		}
-		b.mood += 10
-		fmt.Println(reply)
 	}
 }
 
@@ -98,6 +97,16 @@ func (b Bot) think() {
 
 func (b Bot) dream() {
 	fmt.Println("electric sheepzzzzzzz")
+}
+func (b Bot) convertRedisKey(pre string) map[string]int {
+	prefix := strings.ToLower(b.name) + ":" + pre + ":"
+	fullkeys := getKeys(prefix)
+	re, _ := regexp.Compile(prefix + `(.*)`)
+	keys := make(map[string]int)
+	for i := range fullkeys {
+		keys[string(re.FindStringSubmatch(fullkeys[i])[1])] = 1
+	}
+	return keys
 }
 
 func (b Bot) procsz(s string, stage string) string {
