@@ -60,14 +60,11 @@ func (b Bot) talkPerson() {
 
 		if len(subject) > 0 {
 			you := regexp.MustCompile(`(?i)\bi\b`)
-			matchedYou := you.MatchString(subject)
 			me := regexp.MustCompile(`(?i)\byou\b`)
-			matchedMe := me.MatchString(subject)
-			fmt.Println("MME :", matchedMe, " MYOU:", matchedYou)
 			action = b.procsz(action, "post")
-			if matchedMe {
+			if me.MatchString(subject) {
 				fmt.Println("ITs ME!", b.name+", I"+action)
-			} else if matchedYou {
+			} else if you.MatchString(subject) {
 				fmt.Println("ITs YOU!", p.name+", YOU"+action)
 			} else {
 				fmt.Println("Oh yeah, " + subject + ". Yeah, " + action)
