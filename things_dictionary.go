@@ -22,3 +22,12 @@ type Thing struct {
 	relationships []interface{}
 	memories      []interface{}
 }
+
+type keywurds struct {
+	keywurd map[string]reassmb
+}
+
+type reassmb struct {
+	score  int
+	decomp map[string][]string
+}

@@ -90,13 +90,17 @@ func getValue(k string) string {
 	return string(v)
 }
 
-func understand(sentence string) (string, string) {
+func (b Bot) understand(sentence string, person_name string) (string, string) {
 	// first check for pronouns, then local redis, then internet dictionary
 	var subject string
 	var action string
 	var wurds = strings.Split(sentence, " ")
+	// combine pronouns and known names into a pool of likely subject candidates.
+	subjects := pronouns
+	subjects[strings.ToLower(b.name)] = 1
+	subjects[strings.ToLower(person_name)] = 1
 	for w := range wurds {
-		_, ok := pronouns[strings.ToLower(wurds[w])]
+		_, ok := subjects[strings.ToLower(wurds[w])]
 		if ok {
 			r := regexp.MustCompile(`(?i)\b(` + wurds[w] + `)\b(.*)`)
 			matches := r.FindAllStringSubmatch(sentence, -1)

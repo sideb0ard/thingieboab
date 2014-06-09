@@ -2,29 +2,32 @@ package main
 
 import (
 	"fmt"
+	//	"time"
 )
 
 func main() {
-	//if len(os.Args) == 1 {
-	//	log.Fatal("GIMME WURRRRRDZ")
-	//}
-	//fmt.Println("THINGS ARE GO!")
-	//tokenz := tokenizer(strings.Join(os.Args[1:], " "))
-	//for i := range tokenz {
-	//	fmt.Println("TOKEN: ", tokenz[i])
-	//}
-	//	startwurds := os.Args[1]
-	//	neurons := make(chan Thought)
-	//	done := make(chan bool)
-	//	go lowermind(neurons)
-	//	go uppermind(neurons)
-	//	initThought := Thought{startwurds, 100}
-	//	neurons <- initThought
-	//	_ = <-done
+	//bored_chan := make(chan bool)
+	done_chan := make(chan bool)
+	//listen_chan := make(chan string)
+	//mood_chan := make(chan int)
+	//neurons_chan := make(chan Thought)
+
 	var b Bot
 	b.name = "AIGOR"
 	b.mood = 100
 	b.innit()
-	b.talkPerson()
+
+	//	go b.listen(listen_chan)
+	//	go b.lowermind(mood_chan, neurons_chan)
+	//	go b.moody(mood_chan)
+	//	go b.uppermind(mood_chan, neurons_chan)
+	//	go b.talkPerson(bored_chan, listen_chan, mood_chan, neurons_chan)
+	//
+	//	for {
+	//		time.Sleep(60 * time.Second)
+	//		b.think(bored_chan, mood_chan, neurons_chan)
+	//	}
+
 	fmt.Println("nite nite.")
+	_ = <-done_chan
 }
