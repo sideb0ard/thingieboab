@@ -16,23 +16,19 @@ import (
 
 var pronouns map[string]int
 
-func (b Bot) innit() {
+//var keywurds Keywurds
+
+func (b Bot) innit(keywurds *Keywurds) {
 	pronouns = b.convertRedisKey("pronoun")
-	file, _ := ioutil.ReadFile("./reasmb_rules.json")
+	file, _ := ioutil.ReadFile("./bobbybot.json")
 	//reass_file, e := os.Open("./reasmb_rules.json")
 
-	var kw Keywurds
-	err := json.Unmarshal(file, &kw)
+	err := json.Unmarshal(file, &keywurds)
 	if err != nil {
 		fmt.Println("ERRRRRRR:", err)
 	}
 
 	//fmt.Println(kw.Keywords)
-	for blah := range kw.Keywords {
-		fmt.Println(blah)
-		fmt.Println(kw.Keywords[blah].Score)
-	}
-
 	//m := new(Dispatch)
 	//var m interface{}
 	//var jsontype jsonobject
@@ -90,7 +86,7 @@ func (b Bot) think(bored_chan chan bool, mood_chan chan int, neurons_chan chan T
 	}
 }
 
-func (b Bot) talkperson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought) {
+func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought, keywurds Keywurds) {
 	p := Person{}
 
 	fmt.Printf("Hullo. I am " + b.Name + "\n")
@@ -100,12 +96,11 @@ func (b Bot) talkperson(bored_chan chan bool, listen_chan chan string, mood_chan
 		p.Name = <-listen_chan
 		fmt.Printf("Pleased to meet ya %v\nWha's gon' on?\n", p.Name)
 	}
-
 	for {
 		select {
 		case line, _ := <-listen_chan:
 			line = b.procsz(line, "pre")
-			reply := transform(line)
+			reply := transform(line, keywurds)
 			reply = b.procsz(reply, "post")
 			fmt.Println(reply)
 			//subject, action := b.understand(line, p.Name)
@@ -175,14 +170,32 @@ func (b Bot) procsz(s string, stage string) string {
 	return s
 }
 
-func transform(s string) string {
-	//rank := -2
+func transform(s string, keywurds Keywurds) string {
+	score := -2
 	//reasmb := ""
 	re := regexp.MustCompile(`[?!,]`)
 	s = re.ReplaceAllString(s, ".")
 	rebut := regexp.MustCompile(`but`)
 	s = rebut.ReplaceAllString(s, ".")
 	sparts := strings.Split(s, ".")
-	fmt.Println(sparts)
+	for spart := range sparts {
+		//fmt.Println(spart)
+		for kw := range keywurds.Keywords {
+			if regexp.MustCompile(`(?i)\b`+kw+`\b`).MatchString(sparts[spart]) && score < keywurds.Keywords[kw].Score {
+				score = keywurds.Keywords[kw].Score
+				//fmt.Println("OOOH YA! MATCH : ", keywurds.Keywords[kw].Decomp, spart)
+				for d := range keywurds.Keywords[kw].Decomp {
+					dre := regexp.MustCompile(`(?i)\s*\*\s*`)
+					reply := dre.ReplaceAllString(d, "\\b(.*)\\b")
+					fmt.Println(d)
+					fmt.Println(reply)
+				}
+			}
+		}
+	}
+	//	fmt.Println(blah)
+	//	//	//fmt.Println(kw.Keywords[blah].Score)
+	//}
+
 	return s
 }
