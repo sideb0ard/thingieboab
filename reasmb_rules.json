@@ -1,7 +1,7 @@
 {
   "keywords": {
     "sorry": {
-      "score": 0,
+      "score": 10,
       "decomp": {
         "*": [
           "*zzt* don't worry, it's fine..",
@@ -15,15 +15,16 @@
     "remember": {
       "score": 5,
       "decomp": {
-        "* i remember *": [
-          "*bbzt* did you like (2)? **zzt* more like that? .*"
-        ],
-        "* do you remember *": [
-          "**zzt* yes, i remember (2)",
-          "What*about (2) ?"
-        ]
+        "* i remember *": 
+            [
+              "*bbzt* did you like (2)? **zzt* more like that? .*"
+            ],
+        "* do you remember *": 
+            [
+              "**zzt* yes, i remember (2)",
+              "What*about (2) ?"
+            ]
       }
     }
   }
 }
-

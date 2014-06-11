@@ -2,11 +2,11 @@ package main
 
 import (
 	"bufio"
-	//"encoding/json"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
+	//"log"
 	"math/rand"
 	"os"
 	"regexp"
@@ -18,11 +18,20 @@ var pronouns map[string]int
 
 func (b Bot) innit() {
 	pronouns = b.convertRedisKey("pronoun")
-	file, e := ioutil.ReadFile("./reasmb_rules.json")
-	if e != nil {
-		log.Fatalln("File error: %v", e)
+	file, _ := ioutil.ReadFile("./reasmb_rules.json")
+	//reass_file, e := os.Open("./reasmb_rules.json")
+
+	var kw Keywurds
+	err := json.Unmarshal(file, &kw)
+	if err != nil {
+		fmt.Println("ERRRRRRR:", err)
 	}
-	fmt.Printf("%s\n", string(file))
+
+	//fmt.Println(kw.Keywords)
+	for blah := range kw.Keywords {
+		fmt.Println(blah)
+		fmt.Println(kw.Keywords[blah].Score)
+	}
 
 	//m := new(Dispatch)
 	//var m interface{}
@@ -81,15 +90,15 @@ func (b Bot) think(bored_chan chan bool, mood_chan chan int, neurons_chan chan T
 	}
 }
 
-func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought) {
+func (b Bot) talkperson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought) {
 	p := Person{}
 
-	fmt.Printf("Hullo. I am " + b.name + "\n")
+	fmt.Printf("Hullo. I am " + b.Name + "\n")
 
-	if len(p.name) == 0 {
+	if len(p.Name) == 0 {
 		fmt.Println("What is your name?")
-		p.name = <-listen_chan
-		fmt.Printf("Pleased to meet ya %v\nWha's gon' on?\n", p.name)
+		p.Name = <-listen_chan
+		fmt.Printf("Pleased to meet ya %v\nWha's gon' on?\n", p.Name)
 	}
 
 	for {
@@ -99,13 +108,13 @@ func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan
 			reply := transform(line)
 			reply = b.procsz(reply, "post")
 			fmt.Println(reply)
-			//subject, action := b.understand(line, p.name)
+			//subject, action := b.understand(line, p.Name)
 			//if len(subject) > 0 {
 			//	action = b.procsz(action, "post")
-			//	if regexp.MustCompile(`(?i)\byou\b`).MatchString(subject) || regexp.MustCompile(`(?i)\b`+b.name+`\b`).MatchString(subject) {
-			//		fmt.Println("ITs ME! ", b.name)
-			//	} else if regexp.MustCompile(`(?i)\bi\b`).MatchString(subject) || regexp.MustCompile(`(?i)\b`+p.name+`\b`).MatchString(subject) {
-			//		fmt.Println("ITs YOU!", p.name+", YOU"+action)
+			//	if regexp.MustCompile(`(?i)\byou\b`).MatchString(subject) || regexp.MustCompile(`(?i)\b`+b.Name+`\b`).MatchString(subject) {
+			//		fmt.Println("ITs ME! ", b.Name)
+			//	} else if regexp.MustCompile(`(?i)\bi\b`).MatchString(subject) || regexp.MustCompile(`(?i)\b`+p.Name+`\b`).MatchString(subject) {
+			//		fmt.Println("ITs YOU!", p.Name+", YOU"+action)
 			//	} else {
 			//		fmt.Println("Oh yeah, " + subject + ". Yeah, " + action)
 			//	}
@@ -119,12 +128,12 @@ func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan
 			//		fmt.Printf("Sorry, i don't know what %v means - can you tell me?\n", line)
 			//		explanation, _ := <-listen_chan
 			//		fmt.Printf("Thanks, so \"%v\" means \"%v\" - got it (i think!!)\n", line, explanation)
-			//		saveKnowledge(b.name+":memory:"+line, explanation)
+			//		saveKnowledge(b.Name+":memory:"+line, explanation)
 			//	}
 			//}
 
-		case thought, _ := <-neurons_chan:
-			fmt.Println("HERES A THOUGHT...", thought)
+		case Thought, _ := <-neurons_chan:
+			fmt.Println("HERES A Thought...", Thought)
 		case _, _ = <-bored_chan:
 			fmt.Println("**bzzzt** getting bored here, challenge me, bro.. **8zz8**")
 		}
@@ -135,7 +144,7 @@ func (b Bot) dream() {
 	fmt.Println("electric sheepzzzzzzz")
 }
 func (b Bot) convertRedisKey(pre string) map[string]int {
-	prefix := strings.ToLower(b.name) + ":" + pre + ":"
+	prefix := strings.ToLower(b.Name) + ":" + pre + ":"
 	fullkeys := getKeys(prefix)
 	re, _ := regexp.Compile(prefix + `(.*)`)
 	keys := make(map[string]int)
@@ -147,7 +156,7 @@ func (b Bot) convertRedisKey(pre string) map[string]int {
 
 func (b Bot) procsz(s string, stage string) string {
 	// pre- or post- process a string and return updated string
-	prefix := strings.ToLower(b.name) + ":" + stage + ":"
+	prefix := strings.ToLower(b.Name) + ":" + stage + ":"
 	fullkeys := getKeys(prefix)
 	re, _ := regexp.Compile(prefix + `(.*)`)
 	keys := make(map[string]int)

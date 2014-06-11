@@ -1,33 +1,33 @@
 package main
 
 type Person struct {
-	name string
-	mood int
+	Name string
+	Mood int
 }
 
 type Thought struct {
-	wurds string
-	mood  int
+	Wurds string
+	Mood  int
 }
 
 type Bot struct {
-	name string
-	mood int
+	Name string
+	Mood int
 }
 
 type Thing struct {
-	name          string
-	thingType     string
-	properties    []interface{}
-	relationships []interface{}
-	memories      []interface{}
+	Name          string
+	ThingType     string
+	Properties    []interface{}
+	Relationships []interface{}
+	Memories      []interface{}
 }
 
-type keywurds struct {
-	keywurd map[string]reassmb
+type Keywurds struct {
+	Keywords map[string]Decomp
 }
 
-type reassmb struct {
-	score  int
-	decomp map[string][]string
+type Decomp struct {
+	Score  int
+	Decomp map[string][]string
 }

@@ -7,14 +7,14 @@ import (
 
 func main() {
 	//bored_chan := make(chan bool)
-	done_chan := make(chan bool)
+	//done_chan := make(chan bool)
 	//listen_chan := make(chan string)
 	//mood_chan := make(chan int)
 	//neurons_chan := make(chan Thought)
 
 	var b Bot
-	b.name = "AIGOR"
-	b.mood = 100
+	b.Name = "AIGOR"
+	b.Mood = 100
 	b.innit()
 
 	//	go b.listen(listen_chan)
@@ -29,5 +29,4 @@ func main() {
 	//	}
 
 	fmt.Println("nite nite.")
-	_ = <-done_chan
 }
