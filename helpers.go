@@ -3,9 +3,18 @@ package main
 import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
+	"math/rand"
 	"regexp"
 	"strings"
+	"time"
 )
+
+func random(min, max int) int {
+	rand.Seed(time.Now().Unix())
+	//fmt.Println("MAX IS ", max, " MIN IS ", min)
+	return rand.Intn(max-min) + min
+	//return 7
+}
 
 func tokenizer(bigstringy string) []string {
 	// returns a slice from sentence of all smaller phrases

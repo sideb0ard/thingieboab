@@ -20,14 +20,14 @@ func main() {
 	b.innit(&keywurds)
 
 	go b.listen(listen_chan)
-	go b.lowermind(mood_chan, neurons_chan)
+	//go b.lowermind(mood_chan, neurons_chan)
 	go b.moody(mood_chan)
-	go b.uppermind(mood_chan, neurons_chan)
+	//go b.uppermind(mood_chan, neurons_chan)
 	go b.talkPerson(bored_chan, listen_chan, mood_chan, neurons_chan, keywurds)
 
 	for {
 		time.Sleep(60 * time.Second)
-		b.think(bored_chan, mood_chan, neurons_chan)
+		//b.think(bored_chan, mood_chan, neurons_chan)
 	}
 
 	fmt.Println("nite nite.")

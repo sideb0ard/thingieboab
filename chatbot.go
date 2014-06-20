@@ -10,13 +10,12 @@ import (
 	"math/rand"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
 
 var pronouns map[string]int
-
-//var keywurds Keywurds
 
 func (b Bot) innit(keywurds *Keywurds) {
 	pronouns = b.convertRedisKey("pronoun")
@@ -102,7 +101,7 @@ func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan
 			line = b.procsz(line, "pre")
 			reply := transform(line, keywurds)
 			reply = b.procsz(reply, "post")
-			fmt.Println(reply)
+			//fmt.Println("MAIN REPLY", reply)
 			//subject, action := b.understand(line, p.Name)
 			//if len(subject) > 0 {
 			//	action = b.procsz(action, "post")
@@ -179,16 +178,45 @@ func transform(s string, keywurds Keywurds) string {
 	s = rebut.ReplaceAllString(s, ".")
 	sparts := strings.Split(s, ".")
 	for spart := range sparts {
-		//fmt.Println(spart)
+		//fmt.Println("SPART: ", sparts[spart])
 		for kw := range keywurds.Keywords {
+			// fmt.Println("KW: ", kw, "SCORE IS ", score, "KEYWURD SCORE IS ", keywurds.Keywords[kw].Score)
 			if regexp.MustCompile(`(?i)\b`+kw+`\b`).MatchString(sparts[spart]) && score < keywurds.Keywords[kw].Score {
+				//fmt.Println("KEYWORD MATCH (and lower score) : ", keywurds.Keywords[kw].Decomp, spart, score)
 				score = keywurds.Keywords[kw].Score
-				//fmt.Println("OOOH YA! MATCH : ", keywurds.Keywords[kw].Decomp, spart)
 				for d := range keywurds.Keywords[kw].Decomp {
 					dre := regexp.MustCompile(`(?i)\s*\*\s*`)
-					reply := dre.ReplaceAllString(d, "\\b(.*)\\b")
-					fmt.Println(d)
-					fmt.Println(reply)
+					nre := regexp.MustCompile(`(?i)` + dre.ReplaceAllString(d, "\\b(.*)\\b"))
+					decomp_matches := nre.FindAllStringSubmatch(sparts[spart], -1)
+					if len(decomp_matches) > 0 {
+						//fmt.Println("DECOMP MATCH! : ", decomp_matches)
+
+						//fmt.Println("WUP _ MATCHED!")
+						//fmt.Println("DECOMP: ", d)
+						//fmt.Println("DECOMP_MATCHES: ", decomp_matches)
+						//fmt.Println("RECOMPREPLY: ", nre)
+						////fmt.Println(len(decomp_matches))
+						//randy := random(1, len(decomp_matches[0]))
+						//fmt.Println("LENNY: ", len(decomp_matches[0]))
+						//fmt.Println("RANDY: ", randy)
+						//fmt.Println("RANDREPLY:", decomp_matches[0][randy])
+						//fmt.Println("**D**:", keywurds.Keywords[kw].Decomp[d])
+						//fmt.Println("**LEN D**:", len(keywurds.Keywords[kw].Decomp[d]))
+						randy := random(0, len(keywurds.Keywords[kw].Decomp[d]))
+						reply := keywurds.Keywords[kw].Decomp[d][randy]
+						for j := range decomp_matches[0] {
+							decomp_re := regexp.MustCompile(`\(` + strconv.Itoa(j) + `\)`)
+							//fmt.Println("J: ", strconv.Itoa(j))
+							//fmt.Println("ITEM: ", decomp_matches[0][j])
+							//fmt.Println("DECOMP_RE: ", decomp_re)
+							reply = decomp_re.ReplaceAllString(reply, decomp_matches[0][j])
+							spx := regexp.MustCompile(`\s+`)
+							reply = spx.ReplaceAllString(reply, " ")
+						}
+						fmt.Println(reply)
+						return (reply)
+					}
+					// TODO Match synonyms - @
 				}
 			}
 		}
