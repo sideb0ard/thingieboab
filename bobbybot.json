@@ -339,7 +339,7 @@
       }
     },
     "can": {
-      "score": 0,
+      "score": 2,
       "decomp": {
         "* can you *": [
           "You believe I can (2) don't you ?",
@@ -668,7 +668,9 @@
       "score": 50,
       "decomp": {
         "*": [
-          "*bbzt.* Usage: You may instruct me 'Tell me music like BLAH'. *bbzt*"
+          "*bbzt.* Shit, don't ask me for help, i know less thn you!**zz",
+          "*zzzazzbotbbzt.* Go see (human) doctor if you need help.",
+          "f#3df77888\\ search google //sdsd ** ffs."
         ]
       }
     },

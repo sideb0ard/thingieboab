@@ -20,19 +20,12 @@ var pronouns map[string]int
 func (b Bot) innit(keywurds *Keywurds) {
 	pronouns = b.convertRedisKey("pronoun")
 	file, _ := ioutil.ReadFile("./bobbybot.json")
-	//reass_file, e := os.Open("./reasmb_rules.json")
 
 	err := json.Unmarshal(file, &keywurds)
 	if err != nil {
 		fmt.Println("ERRRRRRR:", err)
 	}
 
-	//fmt.Println(kw.Keywords)
-	//m := new(Dispatch)
-	//var m interface{}
-	//var jsontype jsonobject
-	//json.Unmarshal(file, &jsontype)
-	//fmt.Printf("Results: %v\n", jsontype)
 }
 
 func (b Bot) listen(listen_chan chan string) {
@@ -93,15 +86,14 @@ func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan
 	if len(p.Name) == 0 {
 		fmt.Println("What is your name?")
 		p.Name = <-listen_chan
-		fmt.Printf("Pleased to meet ya %v\nWha's gon' on?\n", p.Name)
+		fmt.Printf("\nPleased to meet ya %v\nWha's gon' on?\n\n", p.Name)
 	}
 	for {
 		select {
 		case line, _ := <-listen_chan:
-			line = b.procsz(line, "pre")
-			reply := transform(line, keywurds)
-			reply = b.procsz(reply, "post")
-			//fmt.Println("MAIN REPLY", reply)
+			//line = b.procsz(line, "pre")
+			reply := b.transform(line, keywurds)
+			fmt.Println(">", reply, "\n")
 			//subject, action := b.understand(line, p.Name)
 			//if len(subject) > 0 {
 			//	action = b.procsz(action, "post")
@@ -149,8 +141,10 @@ func (b Bot) convertRedisKey(pre string) map[string]int {
 }
 
 func (b Bot) procsz(s string, stage string) string {
+	//fmt.Println("IN PROCSZ with", s)
 	// pre- or post- process a string and return updated string
 	prefix := strings.ToLower(b.Name) + ":" + stage + ":"
+	//fmt.Println("PREFIX", prefix)
 	fullkeys := getKeys(prefix)
 	re, _ := regexp.Compile(prefix + `(.*)`)
 	keys := make(map[string]int)
@@ -163,67 +157,74 @@ func (b Bot) procsz(s string, stage string) string {
 		if ok {
 			r := regexp.MustCompile(`\b` + wurds[w] + `\b`)
 			s = r.ReplaceAllString(s, getValue(prefix+wurds[w]))
-
 		}
 	}
+	//fmt.Println("RETURNINF FROM PROCSZ with", s)
 	return s
 }
 
-func transform(s string, keywurds Keywurds) string {
+func (b Bot) transform(s string, keywurds Keywurds) string {
+	s = b.procsz(s, "pre")
 	score := -2
-	//reasmb := ""
+	reasmb := ""
 	re := regexp.MustCompile(`[?!,]`)
 	s = re.ReplaceAllString(s, ".")
 	rebut := regexp.MustCompile(`but`)
 	s = rebut.ReplaceAllString(s, ".")
 	sparts := strings.Split(s, ".")
-	for spart := range sparts {
-		//fmt.Println("SPART: ", sparts[spart])
-		for kw := range keywurds.Keywords {
-			// fmt.Println("KW: ", kw, "SCORE IS ", score, "KEYWURD SCORE IS ", keywurds.Keywords[kw].Score)
-			if regexp.MustCompile(`(?i)\b`+kw+`\b`).MatchString(sparts[spart]) && score < keywurds.Keywords[kw].Score {
-				//fmt.Println("KEYWORD MATCH (and lower score) : ", keywurds.Keywords[kw].Decomp, spart, score)
-				score = keywurds.Keywords[kw].Score
-				for d := range keywurds.Keywords[kw].Decomp {
-					dre := regexp.MustCompile(`(?i)\s*\*\s*`)
-					nre := regexp.MustCompile(`(?i)` + dre.ReplaceAllString(d, "\\b(.*)\\b"))
-					decomp_matches := nre.FindAllStringSubmatch(sparts[spart], -1)
-					if len(decomp_matches) > 0 {
-						//fmt.Println("DECOMP MATCH! : ", decomp_matches)
 
-						//fmt.Println("WUP _ MATCHED!")
-						//fmt.Println("DECOMP: ", d)
-						//fmt.Println("DECOMP_MATCHES: ", decomp_matches)
-						//fmt.Println("RECOMPREPLY: ", nre)
-						////fmt.Println(len(decomp_matches))
-						//randy := random(1, len(decomp_matches[0]))
-						//fmt.Println("LENNY: ", len(decomp_matches[0]))
-						//fmt.Println("RANDY: ", randy)
-						//fmt.Println("RANDREPLY:", decomp_matches[0][randy])
-						//fmt.Println("**D**:", keywurds.Keywords[kw].Decomp[d])
-						//fmt.Println("**LEN D**:", len(keywurds.Keywords[kw].Decomp[d]))
-						randy := random(0, len(keywurds.Keywords[kw].Decomp[d]))
-						reply := keywurds.Keywords[kw].Decomp[d][randy]
-						for j := range decomp_matches[0] {
-							decomp_re := regexp.MustCompile(`\(` + strconv.Itoa(j) + `\)`)
-							//fmt.Println("J: ", strconv.Itoa(j))
-							//fmt.Println("ITEM: ", decomp_matches[0][j])
-							//fmt.Println("DECOMP_RE: ", decomp_re)
-							reply = decomp_re.ReplaceAllString(reply, decomp_matches[0][j])
-							spx := regexp.MustCompile(`\s+`)
-							reply = spx.ReplaceAllString(reply, " ")
-						}
-						fmt.Println(reply)
-						return (reply)
+	reassemblrrr := func(kw string, spart int) string {
+		for d := range keywurds.Keywords[kw].Decomp {
+			dre := regexp.MustCompile(`(?i)\s*\*\s*`)
+			nre := regexp.MustCompile(`(?i)` + dre.ReplaceAllString(d, "\\b(.*)\\b"))
+			decomp_matches := nre.FindAllStringSubmatch(sparts[spart], -1)
+			if len(decomp_matches) > 0 {
+
+				randy := random(0, len(keywurds.Keywords[kw].Decomp[d]))
+				reasmb = keywurds.Keywords[kw].Decomp[d][randy]
+
+				// IF ITS A GOTO, RETURN THE NEW KEYWORD SO IT CAN REASSEMBLED
+				goto_re := regexp.MustCompile(`^goto\s(\w*).*`)
+				if goto_re.FindString(reasmb) != "" {
+					nkw := goto_re.FindStringSubmatch(reasmb)
+					return (nkw[1])
+				}
+
+				for j := 1; j < len(decomp_matches[0]); j++ {
+					if decomp_matches[0][j] == "" {
+						continue
 					}
-					// TODO Match synonyms - @
+					decomp_matches[0][j] = b.procsz(decomp_matches[0][j], "post")
+					decomp_re := regexp.MustCompile(`\(` + strconv.Itoa(j) + `\)`)
+					reasmb = decomp_re.ReplaceAllString(reasmb, decomp_matches[0][j])
+				}
+			}
+			// TODO Match synonyms - @
+		}
+		return ""
+	}
+
+	for spart := range sparts {
+		for kw := range keywurds.Keywords {
+			//fmt.Println("KW", kw)
+			if regexp.MustCompile(`(?i)\b`+kw+`\b`).MatchString(sparts[spart]) && score < keywurds.Keywords[kw].Score {
+				score = keywurds.Keywords[kw].Score
+				rerun := reassemblrrr(kw, spart)
+				if rerun != "" {
+					reassemblrrr(rerun, spart)
 				}
 			}
 		}
 	}
-	//	fmt.Println(blah)
-	//	//	//fmt.Println(kw.Keywords[blah].Score)
-	//}
 
-	return s
+	if reasmb == "" {
+		randy := random(0, len(keywurds.Keywords["xnone"].Decomp["*"]))
+		reasmb = keywurds.Keywords["xnone"].Decomp["*"][randy]
+	}
+	spx := regexp.MustCompile(`\s+`)
+	reasmb = spx.ReplaceAllString(reasmb, " ")
+	q_re := regexp.MustCompile(`\s\?`)
+	reasmb = q_re.ReplaceAllString(reasmb, "?")
+	return reasmb
+
 }
