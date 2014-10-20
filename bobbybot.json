@@ -115,13 +115,23 @@
         ]
       }
     },
-    "dreamed": {
+    "dreamt": {
       "score": 4,
       "decomp": {
-        "* i dreamed *": [
+        "* i dreamt *": [
           "*ddz* i do not dream. **.",
           "*xxz* not of electric sheep, no..**",
           "goto dream"
+        ]
+      }
+    },
+    "music": {
+      "score": 4,
+      "decomp": {
+        "* music *": [
+          "*** love it. DAFT PUNK! they're the best",
+          "*** OH YEAH! CARL CRAIG, I'M ALL ABOUT THE DETROIT TECHNO!",
+          "*** i do enjoy a little Yacht Rock to smooth the night away"
         ]
       }
     },
@@ -130,6 +140,8 @@
       "decomp": {
         "*": [
           "***i drea m of dreams.<<<**",
+          "***tell me about dreams.<<<**",
+          "*** i know a girl who dreamt about horses.<<<**",
           "*what...do dreams feel like?**<<",
           "**wh3re do you go in your dreams?**.<"
         ]

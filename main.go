@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"os/exec"
 	"time"
 )
 
@@ -12,6 +14,9 @@ func main() {
 	listen_chan := make(chan string)
 	mood_chan := make(chan int)
 	neurons_chan := make(chan Thought)
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	cmd.Run()
 
 	var debug = flag.Bool("d", false, "debug - whether to print copious what-i-m-doing messages")
 	flag.Parse()

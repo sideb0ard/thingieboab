@@ -84,12 +84,12 @@ func (b Bot) think(bored_chan chan bool, mood_chan chan int, neurons_chan chan T
 func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought, keywurds Keywurds) {
 	p := Person{}
 
-	fmt.Printf("Hullo. I am " + b.Name + "\n")
+	fmt.Printf(">**Hullo. I am " + b.Name + "\n")
 
 	if len(p.Name) == 0 {
-		fmt.Println("What is your name?")
+		fmt.Println(">What is your name?")
 		p.Name = <-listen_chan
-		fmt.Printf("\nPleased to meet ya %v\nWha's gon' on?\n\n", p.Name)
+		fmt.Printf("\n>Pleased to meet ya %v\n>Wha's gon' on?\n\n", p.Name)
 	}
 	for {
 		select {
