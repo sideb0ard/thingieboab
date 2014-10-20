@@ -19,6 +19,7 @@ var pronouns map[string]int
 
 func (b Bot) innit(keywurds *Keywurds) {
 	pronouns = b.convertRedisKey("pronoun")
+	fmt.Println("PRONOUNSZZ:", pronouns)
 	file, _ := ioutil.ReadFile("./bobbybot.json")
 
 	err := json.Unmarshal(file, &keywurds)
@@ -141,30 +142,45 @@ func (b Bot) convertRedisKey(pre string) map[string]int {
 }
 
 func (b Bot) procsz(s string, stage string) string {
-	//fmt.Println("IN PROCSZ with", s)
 	// pre- or post- process a string and return updated string
 	prefix := strings.ToLower(b.Name) + ":" + stage + ":"
-	//fmt.Println("PREFIX", prefix)
 	fullkeys := getKeys(prefix)
 	re, _ := regexp.Compile(prefix + `(.*)`)
 	keys := make(map[string]int)
 	for i := range fullkeys {
 		keys[string(re.FindStringSubmatch(fullkeys[i])[1])] = 1
 	}
+	if b.Debug {
+		fmt.Println("IN PROCSZ with", s)
+		fmt.Println("PREFIX", prefix)
+		fmt.Println("FULLKEYS:", fullkeys)
+		fmt.Println("KEYS:", keys)
+	}
 	var wurds = strings.Split(s, " ")
 	for w := range wurds {
+		if b.Debug {
+			fmt.Println("Looking for ", wurds[w], " in ", keys)
+		}
 		_, ok := keys[wurds[w]]
 		if ok {
 			r := regexp.MustCompile(`\b` + wurds[w] + `\b`)
 			s = r.ReplaceAllString(s, getValue(prefix+wurds[w]))
 		}
 	}
-	//fmt.Println("RETURNINF FROM PROCSZ with", s)
+	if b.Debug {
+		fmt.Println("RETURNINF FROM PROCSZ with", s)
+	}
 	return s
 }
 
 func (b Bot) transform(s string, keywurds Keywurds) string {
+	if b.Debug {
+		fmt.Println("I GOTZ ", s)
+	}
 	s = b.procsz(s, "pre")
+	if b.Debug {
+		fmt.Println("AN NOW I GOTZ ", s)
+	}
 	score := -2
 	reasmb := ""
 	re := regexp.MustCompile(`[?!,]`)
@@ -175,9 +191,15 @@ func (b Bot) transform(s string, keywurds Keywurds) string {
 
 	reassemblrrr := func(kw string, spart int) string {
 		for d := range keywurds.Keywords[kw].Decomp {
+			// match the asterix in the decomp rules
 			dre := regexp.MustCompile(`(?i)\s*\*\s*`)
+			// change them to word boundary capture groups
 			nre := regexp.MustCompile(`(?i)` + dre.ReplaceAllString(d, "\\b(.*)\\b"))
 			decomp_matches := nre.FindAllStringSubmatch(sparts[spart], -1)
+			if b.Debug {
+				fmt.Println("D iz: ", d)
+				fmt.Println("DECOMPZ: ", decomp_matches)
+			}
 			if len(decomp_matches) > 0 {
 
 				randy := random(0, len(keywurds.Keywords[kw].Decomp[d]))
@@ -206,7 +228,9 @@ func (b Bot) transform(s string, keywurds Keywurds) string {
 
 	for spart := range sparts {
 		for kw := range keywurds.Keywords {
-			//fmt.Println("KW", kw)
+			if b.Debug {
+				fmt.Println("LOOKING FOR ", kw, " IN ", sparts[spart])
+			}
 			if regexp.MustCompile(`(?i)\b`+kw+`\b`).MatchString(sparts[spart]) && score < keywurds.Keywords[kw].Score {
 				score = keywurds.Keywords[kw].Score
 				rerun := reassemblrrr(kw, spart)

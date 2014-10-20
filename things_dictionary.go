@@ -11,8 +11,9 @@ type Thought struct {
 }
 
 type Bot struct {
-	Name string
-	Mood int
+	Name  string
+	Mood  int
+	Debug bool
 }
 
 type Thing struct {

@@ -25,6 +25,35 @@
         ]
       }
     },
+    "jobbie": {
+      "score": 10,
+      "decomp": {
+        "*": [
+          "KEECH TOLE BUM!",
+          "I CAN SMELL IT FROM HERE!",
+          "YOU'RE DISGUSTING!",
+          "DONT KNOW YER ARSE FAE YER BELLY!",
+          "CALL THAT A SHITE?!",
+          "SHITEY BUM!"
+        ]
+      }
+    },
+    "jobito": {
+      "score": 0,
+      "decomp": {
+        "*": [
+          "goto jobbie"
+        ]
+      }
+    },
+    "shite": {
+      "score": 0,
+      "decomp": {
+        "*": [
+          "goto jobbie"
+        ]
+      }
+    },
     "apologise": {
       "score": 0,
       "decomp": {
@@ -37,18 +66,16 @@
       "score": 5,
       "decomp": {
         "* i remember *": [
-          "*bbzt* did you like (2)? **zzt* more like that? .*"
+          "*bbzt* did you like (2)? **zzt* more (2) like that? .*"
         ],
         "* do you remember *": [
-          "**zzt* yes, i remember (2)",
+          "**zzt* yes, i remember (2) (2)",
           "What*about (2) ?",
-          "goto what",
           "*zzt *you mentioned (2) ?"
         ],
         "* you remember *": [
-          "How could I forget (2) ?",
-          "What about (2) should I remember ?",
-          "goto you"
+          "How could I forget (2) ? (2)",
+          "What about (2) should I (2) remember ?"
         ]
       }
     },
