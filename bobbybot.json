@@ -7,6 +7,11 @@
           "_bzzzt** Plz type 'help' **",
           "**bzzt* i may be bot, i think you smoking the wacky*backy. Type 'help'",
           "*!*!*! plz type 'help'",
+          "*xzzt** are you just yanking ma chain?",
+          "**zzt** what's yer deal? type some sense..",
+          "*%x** what's that? yer talking shite? aye, i know",
+          "zz*&$ i think you need assitance, mate - have you ever used a computer before?",
+          "** come on pal, i don't have all day here, stop wasting my time...",
           "*zzt*. Type 'help' for my instruction set",
           "_bzzzt** I am lozt. Please type 'help' for my instruction set.",
           "*_beeop** hello. you are stoner. please type 'help' for my instruction set."
@@ -35,6 +40,14 @@
           "DONT KNOW YER ARSE FAE YER BELLY!",
           "CALL THAT A SHITE?!",
           "SHITEY BUM!"
+        ]
+      }
+    },
+    "time": {
+      "score": 7,
+      "decomp": {
+        "*": [
+          "ish timecall"
         ]
       }
     },
@@ -697,7 +710,8 @@
         "*": [
           "*bbzt.* Shit, don't ask me for help, i know less thn you!**zz",
           "*zzzazzbotbbzt.* Go see (human) doctor if you need help.",
-          "f#3df77888\\ search google //sdsd ** ffs."
+          "(i need somebody!)  LOve that s0ng too.",
+          "// let me google that for you? // ** ffs."
         ]
       }
     },

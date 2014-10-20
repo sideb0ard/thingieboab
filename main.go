@@ -15,7 +15,6 @@ func main() {
 
 	var debug = flag.Bool("d", false, "debug - whether to print copious what-i-m-doing messages")
 	flag.Parse()
-	fmt.Println("CHATTY: ", *debug)
 
 	var keywurds Keywurds
 

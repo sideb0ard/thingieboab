@@ -19,7 +19,9 @@ var pronouns map[string]int
 
 func (b Bot) innit(keywurds *Keywurds) {
 	pronouns = b.convertRedisKey("pronoun")
-	fmt.Println("PRONOUNSZZ:", pronouns)
+	if b.Debug {
+		fmt.Println("PRONOUNSZZ:", pronouns)
+	}
 	file, _ := ioutil.ReadFile("./bobbybot.json")
 
 	err := json.Unmarshal(file, &keywurds)
@@ -202,14 +204,19 @@ func (b Bot) transform(s string, keywurds Keywurds) string {
 			}
 			if len(decomp_matches) > 0 {
 
+				// grab a random reassembly rule
 				randy := random(0, len(keywurds.Keywords[kw].Decomp[d]))
 				reasmb = keywurds.Keywords[kw].Decomp[d][randy]
 
-				// IF ITS A GOTO, RETURN THE NEW KEYWORD SO IT CAN REASSEMBLED
+				// if its a goto, return the new keyword so it can reassembled
 				goto_re := regexp.MustCompile(`^goto\s(\w*).*`)
 				if goto_re.FindString(reasmb) != "" {
 					nkw := goto_re.FindStringSubmatch(reasmb)
 					return (nkw[1])
+				}
+				exec_re := regexp.MustCompile(`^ish\s(\w*).*`)
+				if exec_re.FindString(reasmb) != "" {
+					reasmb = time.Now().Format(time.RFC1123)
 				}
 
 				for j := 1; j < len(decomp_matches[0]); j++ {
