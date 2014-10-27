@@ -1,10 +1,5 @@
 package main
 
-type Person struct {
-	Name string
-	Mood int
-}
-
 type Thought struct {
 	Wurds string
 	Mood  int
@@ -18,6 +13,7 @@ type Bot struct {
 
 type Thing struct {
 	Name          string
+	Mood          int
 	ThingType     string
 	Properties    []interface{}
 	Relationships []interface{}

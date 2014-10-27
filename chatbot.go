@@ -15,13 +15,13 @@ import (
 	"time"
 )
 
-var pronouns map[string]int
+//var pronouns map[string]int
 
 func (b Bot) innit(keywurds *Keywurds) {
-	pronouns = b.convertRedisKey("pronoun")
-	if b.Debug {
-		fmt.Println("PRONOUNSZZ:", pronouns)
-	}
+	//pronouns = b.convertRedisKey("pronoun")
+	//if b.Debug {
+	//	fmt.Println("PRONOUNSZZ:", pronouns)
+	//}
 	file, _ := ioutil.ReadFile("./bobbybot.json")
 
 	err := json.Unmarshal(file, &keywurds)
@@ -82,7 +82,7 @@ func (b Bot) think(bored_chan chan bool, mood_chan chan int, neurons_chan chan T
 }
 
 func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought, keywurds Keywurds) {
-	p := Person{}
+	p := Thing{}
 
 	fmt.Printf(">**Hullo. I am " + b.Name + "\n")
 
@@ -132,32 +132,33 @@ func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan
 func (b Bot) dream() {
 	fmt.Println("electric sheepzzzzzzz")
 }
-func (b Bot) convertRedisKey(pre string) map[string]int {
-	prefix := strings.ToLower(b.Name) + ":" + pre + ":"
-	fullkeys := getKeys(prefix)
-	re, _ := regexp.Compile(prefix + `(.*)`)
-	keys := make(map[string]int)
-	for i := range fullkeys {
-		keys[string(re.FindStringSubmatch(fullkeys[i])[1])] = 1
-	}
-	return keys
-}
+
+//func (b Bot) convertRedisKey(pre string) map[string]int {
+//	prefix := strings.ToLower(b.Name) + ":" + pre + ":"
+//	fullkeys := getKeys(prefix)
+//	re, _ := regexp.Compile(prefix + `(.*)`)
+//	keys := make(map[string]int)
+//	for i := range fullkeys {
+//		keys[string(re.FindStringSubmatch(fullkeys[i])[1])] = 1
+//	}
+//	return keys
+//}
 
 func (b Bot) procsz(s string, stage string) string {
 	// pre- or post- process a string and return updated string
 	prefix := strings.ToLower(b.Name) + ":" + stage + ":"
-	fullkeys := getKeys(prefix)
-	re, _ := regexp.Compile(prefix + `(.*)`)
+	//fullkeys := getKeys(prefix)
+	//re, _ := regexp.Compile(prefix + `(.*)`)
 	keys := make(map[string]int)
-	for i := range fullkeys {
-		keys[string(re.FindStringSubmatch(fullkeys[i])[1])] = 1
-	}
-	if b.Debug {
-		fmt.Println("IN PROCSZ with", s)
-		fmt.Println("PREFIX", prefix)
-		fmt.Println("FULLKEYS:", fullkeys)
-		fmt.Println("KEYS:", keys)
-	}
+	//for i := range fullkeys {
+	//	keys[string(re.FindStringSubmatch(fullkeys[i])[1])] = 1
+	//}
+	//if b.Debug {
+	//	fmt.Println("IN PROCSZ with", s)
+	//	fmt.Println("PREFIX", prefix)
+	//	fmt.Println("FULLKEYS:", fullkeys)
+	//	fmt.Println("KEYS:", keys)
+	//}
 	var wurds = strings.Split(s, " ")
 	for w := range wurds {
 		if b.Debug {
