@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	//"log"
 	"math/rand"
+	"net"
 	"os"
 	"regexp"
 	"strconv"
@@ -81,51 +82,68 @@ func (b Bot) think(bored_chan chan bool, mood_chan chan int, neurons_chan chan T
 	}
 }
 
-func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought, keywurds Keywurds) {
+//func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought, keywurds Keywurds) {
+func (b Bot) talkPerson(conn net.Conn, keywurds Keywurds) {
+	bu := bufio.NewReader(conn)
 	p := Thing{}
 
-	fmt.Printf(">**Hullo. I am " + b.Name + "\n")
+	//fmt.Printf(">**Hullo. I am " + b.Name + "\n")
+	conn.Write([]byte(">** HUllo. I am " + b.Name + "\n"))
 
 	if len(p.Name) == 0 {
-		fmt.Println(">What is your name?")
-		p.Name = <-listen_chan
-		fmt.Printf("\n>Pleased to meet ya %v\n>Wha's gon' on?\n\n", p.Name)
+		//fmt.Println(">What is your name?")
+		conn.Write([]byte(">What is your name*?\n"))
+		line, err := bu.ReadBytes('\n')
+		if err != nil {
+			fmt.Println("Errzzz reading :", err.Error())
+		}
+		//p.Name = <-listen_chan
+		p.Name = strings.TrimSpace(string(line))
+		//fmt.Printf("\n>Pleased to meet ya %v\n>Wha's gon' on?\n\n", p.Name)
+		conn.Write([]byte("\n>Please to meet ya " + p.Name + ". Wha's up?\n"))
 	}
 	for {
-		select {
-		case line, _ := <-listen_chan:
-			//line = b.procsz(line, "pre")
-			reply := b.transform(line, keywurds)
-			fmt.Println(">", reply, "\n")
-			//subject, action := b.understand(line, p.Name)
-			//if len(subject) > 0 {
-			//	action = b.procsz(action, "post")
-			//	if regexp.MustCompile(`(?i)\byou\b`).MatchString(subject) || regexp.MustCompile(`(?i)\b`+b.Name+`\b`).MatchString(subject) {
-			//		fmt.Println("ITs ME! ", b.Name)
-			//	} else if regexp.MustCompile(`(?i)\bi\b`).MatchString(subject) || regexp.MustCompile(`(?i)\b`+p.Name+`\b`).MatchString(subject) {
-			//		fmt.Println("ITs YOU!", p.Name+", YOU"+action)
-			//	} else {
-			//		fmt.Println("Oh yeah, " + subject + ". Yeah, " + action)
-			//	}
-			//} else {
-			//	bangqregex := regexp.MustCompile(`[!?]`)
-			//	line = bangqregex.ReplaceAllString(line, "")
-			//	reply := getValue("aigor:memory:" + line)
-			//	if len(reply) > 0 {
-			//		fmt.Println(reply)
-			//	} else {
-			//		fmt.Printf("Sorry, i don't know what %v means - can you tell me?\n", line)
-			//		explanation, _ := <-listen_chan
-			//		fmt.Printf("Thanks, so \"%v\" means \"%v\" - got it (i think!!)\n", line, explanation)
-			//		saveKnowledge(b.Name+":memory:"+line, explanation)
-			//	}
-			//}
-
-		case Thought, _ := <-neurons_chan:
-			fmt.Println("HERES A Thought...", Thought)
-		case _, _ = <-bored_chan:
-			fmt.Println("**bzzzt** getting bored here, challenge me, bro.. **8zz8**")
+		line, err := bu.ReadBytes('\n')
+		if err != nil {
+			fmt.Println("Errzzz reading :", err.Error())
+			break
 		}
+
+		//select {
+		//case line, _ := <-listen_chan:
+		//line = b.procsz(line, "pre")
+		reply := b.transform(string(line), keywurds)
+		conn.Write([]byte("\n>" + reply + "\n"))
+		//fmt.Println(">", reply, "\n")
+		//subject, action := b.understand(line, p.Name)
+		//if len(subject) > 0 {
+		//	action = b.procsz(action, "post")
+		//	if regexp.MustCompile(`(?i)\byou\b`).MatchString(subject) || regexp.MustCompile(`(?i)\b`+b.Name+`\b`).MatchString(subject) {
+		//		fmt.Println("ITs ME! ", b.Name)
+		//	} else if regexp.MustCompile(`(?i)\bi\b`).MatchString(subject) || regexp.MustCompile(`(?i)\b`+p.Name+`\b`).MatchString(subject) {
+		//		fmt.Println("ITs YOU!", p.Name+", YOU"+action)
+		//	} else {
+		//		fmt.Println("Oh yeah, " + subject + ". Yeah, " + action)
+		//	}
+		//} else {
+		//	bangqregex := regexp.MustCompile(`[!?]`)
+		//	line = bangqregex.ReplaceAllString(line, "")
+		//	reply := getValue("aigor:memory:" + line)
+		//	if len(reply) > 0 {
+		//		fmt.Println(reply)
+		//	} else {
+		//		fmt.Printf("Sorry, i don't know what %v means - can you tell me?\n", line)
+		//		explanation, _ := <-listen_chan
+		//		fmt.Printf("Thanks, so \"%v\" means \"%v\" - got it (i think!!)\n", line, explanation)
+		//		saveKnowledge(b.Name+":memory:"+line, explanation)
+		//	}
+		//}
+
+		//case Thought, _ := <-neurons_chan:
+		//	fmt.Println("HERES A Thought...", Thought)
+		//case _, _ = <-bored_chan:
+		//	fmt.Println("**bzzzt** getting bored here, challenge me, bro.. **8zz8**")
+		//}
 	}
 }
 

@@ -42,7 +42,8 @@ func main() {
 	}
 	conns := clientConns(l)
 	for {
-		go handleRequest(<-conns)
+		//go handleRequest(<-conns)
+		go b.talkPerson(<-conns, keywurds)
 	}
 }
 
@@ -79,6 +80,8 @@ func clientConns(l net.Listener) chan net.Conn {
 func handleRequest(conn net.Conn) {
 	b := bufio.NewReader(conn)
 
+	//p := Thing{}
+	conn.Write([]byte("hullp"))
 	for {
 		line, err := b.ReadBytes('\n')
 		if err != nil {
