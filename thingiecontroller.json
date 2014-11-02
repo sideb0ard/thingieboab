@@ -1,0 +1,23 @@
+{
+  "id": "thingieController",
+  "kind": "ReplicationController",
+  "apiVersion": "v1beta1",
+  "desiredState": {
+    "replicas": 3,
+    "replicaSelector": {"name": "thingieboab"},
+    "podTemplate": {
+      "desiredState": {
+         "manifest": {
+           "version": "v1beta1",
+           "id": "thingieController",
+           "containers": [{
+             "name": "thingieboab",
+             "image": "sideb0ard/thingieboab",
+             "ports": [{"containerPort": 7474, "hostPort": 7474}]
+           }]
+         }
+       },
+       "labels": {"name": "thingieboab"}
+      }},
+  "labels": {"name": "thingieboab"}
+}

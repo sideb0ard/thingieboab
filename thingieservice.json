@@ -1,0 +1,10 @@
+{
+  "id": "thingie",
+  "kind": "Service",
+  "apiVersion": "v1beta1",
+  "port": 7477,
+  "containerPort": 7474,
+  "selector": {
+    "name": "thingieboab"
+  }
+}
