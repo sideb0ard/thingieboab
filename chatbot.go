@@ -4,12 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	//"log"
 	"math/rand"
 	"net"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -35,20 +33,6 @@ func (b Bot) innit(keywurds *Keywurds) {
 
 }
 
-func (b Bot) listen(listen_chan chan string) {
-	bio := bufio.NewReader(os.Stdin)
-	for {
-		line, err := bio.ReadBytes('\n')
-		if err == io.EOF {
-			os.Exit(0)
-		}
-		if err != nil {
-			panic(err)
-		}
-		sline := strings.TrimRight(string(line), "\n")
-		listen_chan <- sline
-	}
-}
 
 func (b Bot) uppermind(mood_chan chan int, neurons_chan chan Thought) {
 	for t := range neurons_chan {

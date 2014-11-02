@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"net"
@@ -42,7 +41,6 @@ func main() {
 	}
 	conns := clientConns(l)
 	for {
-		//go handleRequest(<-conns)
 		go b.talkPerson(<-conns, keywurds)
 	}
 }
@@ -77,18 +75,3 @@ func clientConns(l net.Listener) chan net.Conn {
 //	//b.think(bored_chan, mood_chan, neurons_chan)
 //}
 
-func handleRequest(conn net.Conn) {
-	b := bufio.NewReader(conn)
-
-	//p := Thing{}
-	conn.Write([]byte("hullp"))
-	for {
-		line, err := b.ReadBytes('\n')
-		if err != nil {
-			fmt.Println("Errz reading: ", err.Error())
-			break
-		}
-		//conn.Write([]byte(reply))
-		conn.Write([]byte(line))
-	}
-}
