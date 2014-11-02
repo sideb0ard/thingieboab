@@ -23,9 +23,12 @@ func (b Bot) innit(keywurds *Keywurds) {
 	//if b.Debug {
 	//	fmt.Println("PRONOUNSZZ:", pronouns)
 	//}
-	file, _ := ioutil.ReadFile("./bobbybot.json")
+	file, err := ioutil.ReadFile("/var/server/bobbybot.json")
+	if err != nil {
+		file, _ =  ioutil.ReadFile("./bobbybot.json")
+	}
 
-	err := json.Unmarshal(file, &keywurds)
+	err = json.Unmarshal(file, &keywurds)
 	if err != nil {
 		fmt.Println("ERRRRRRR:", err)
 	}
