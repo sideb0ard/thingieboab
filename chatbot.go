@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/coopernurse/gorp"
 	"io/ioutil"
 	//"log"
-	"math/rand"
 	"net"
 	"regexp"
 	"strconv"
@@ -23,7 +23,7 @@ func (b Bot) innit(keywurds *Keywurds) {
 	//}
 	file, err := ioutil.ReadFile("/var/server/bobbybot.json")
 	if err != nil {
-		file, _ =  ioutil.ReadFile("./bobbybot.json")
+		file, _ = ioutil.ReadFile("./bobbybot.json")
 	}
 
 	err = json.Unmarshal(file, &keywurds)
@@ -33,61 +33,33 @@ func (b Bot) innit(keywurds *Keywurds) {
 
 }
 
-
-func (b Bot) uppermind(mood_chan chan int, neurons_chan chan Thought) {
-	for t := range neurons_chan {
-		time.Sleep(1000 * time.Millisecond)
-		fmt.Println(t)
-		reply := Thought{"UPPER MIND SHIZZLE IT", <-mood_chan}
-		neurons_chan <- reply
-	}
-}
-
-func (b Bot) lowermind(mood_chan chan int, neurons_chan chan Thought) {
-	for t := range neurons_chan {
-		time.Sleep(1000 * time.Millisecond)
-		fmt.Println(t)
-		//wurds := search5(t.wurds)
-		reply := Thought{"LOWER MINDS WURDZZZ", <-mood_chan}
-		neurons_chan <- reply
-	}
-}
-
-func (b Bot) moody(mood_chan chan int) {
-	for {
-		mood_chan <- rand.Intn(100)
-	}
-}
-
-func (b Bot) think(bored_chan chan bool, mood_chan chan int, neurons_chan chan Thought) {
-	randy := rand.Intn(2)
-	switch {
-	case randy == 0:
-		bored_chan <- true
-	case randy == 1:
-		neurons_chan <- Thought{"**random Th0ught **", <-mood_chan}
-	}
-}
-
-//func (b Bot) talkPerson(bored_chan chan bool, listen_chan chan string, mood_chan chan int, neurons_chan chan Thought, keywurds Keywurds) {
-func (b Bot) talkPerson(conn net.Conn, keywurds Keywurds) {
+func (b Bot) talkPerson(conn net.Conn, keywurds Keywurds, dbmap *gorp.DbMap) {
 	bu := bufio.NewReader(conn)
-	p := Thing{}
+	p := &Thing{}
 
-	//fmt.Printf(">**Hullo. I am " + b.Name + "\n")
 	conn.Write([]byte(">** HUllo. I am " + b.Name + "\n"))
 
 	if len(p.Name) == 0 {
-		//fmt.Println(">What is your name?")
 		conn.Write([]byte(">What is your name*?\n"))
 		line, err := bu.ReadBytes('\n')
 		if err != nil {
 			fmt.Println("Errzzz reading :", err.Error())
 		}
 		//p.Name = <-listen_chan
-		p.Name = strings.TrimSpace(string(line))
-		//fmt.Printf("\n>Pleased to meet ya %v\n>Wha's gon' on?\n\n", p.Name)
-		conn.Write([]byte("\n>Please to meet ya " + p.Name + ". Wha's up?\n"))
+		nom := strings.TrimSpace(string(line))
+		err = dbmap.SelectOne(p, "select * from thing where name=$1", nom)
+		if err != nil {
+			fmt.Println(nom, "doesnt exist - now creating..")
+			conn.Write([]byte("\n>Please to meet ya " + nom + ". Wha's up?\n"))
+			p.Name = nom
+			err = dbmap.Insert(p)
+			if err != nil {
+				fmt.Println("ERrrr inserting to DB:", err.Error())
+			}
+		} else {
+			fmt.Println("woop! exists")
+			conn.Write([]byte("\n>hey " + nom + ", I know you!. How are ya?\n"))
+		}
 	}
 	for {
 		line, err := bu.ReadBytes('\n')
@@ -101,7 +73,6 @@ func (b Bot) talkPerson(conn net.Conn, keywurds Keywurds) {
 		//line = b.procsz(line, "pre")
 		reply := b.transform(string(line), keywurds)
 		conn.Write([]byte("\n>" + reply + "\n"))
-		//fmt.Println(">", reply, "\n")
 		//subject, action := b.understand(line, p.Name)
 		//if len(subject) > 0 {
 		//	action = b.procsz(action, "post")
@@ -126,11 +97,6 @@ func (b Bot) talkPerson(conn net.Conn, keywurds Keywurds) {
 		//	}
 		//}
 
-		//case Thought, _ := <-neurons_chan:
-		//	fmt.Println("HERES A Thought...", Thought)
-		//case _, _ = <-bored_chan:
-		//	fmt.Println("**bzzzt** getting bored here, challenge me, bro.. **8zz8**")
-		//}
 	}
 }
 

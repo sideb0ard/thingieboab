@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
+	"log"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -14,6 +15,12 @@ func random(min, max int) int {
 	//fmt.Println("MAX IS ", max, " MIN IS ", min)
 	return rand.Intn(max-min) + min
 	//return 7
+}
+
+func checkErr(err error, msg string) {
+	if err != nil {
+		log.Fatalln(msg, err)
+	}
 }
 
 func tokenizer(bigstringy string) []string {

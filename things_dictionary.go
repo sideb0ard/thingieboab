@@ -12,12 +12,13 @@ type Bot struct {
 }
 
 type Thing struct {
-	Name          string
-	Mood          int
-	ThingType     string
-	Properties    []interface{}
-	Relationships []interface{}
-	Memories      []interface{}
+	Id        int64
+	Name      string
+	Mood      int
+	ThingType string
+	//Properties    []interface{}
+	//Relationships []interface{}
+	//Memories      []interface{}
 }
 
 type Keywurds struct {

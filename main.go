@@ -1,8 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/coopernurse/gorp"
+	_ "github.com/lib/pq"
+	"log"
 	"net"
 	//"os/exec"
 	//"time"
@@ -15,14 +19,6 @@ const (
 )
 
 func main() {
-	//bored_chan := make(chan bool)
-	//done_chan := make(chan bool)
-	//listen_chan := make(chan string)
-	//mood_chan := make(chan int)
-	//neurons_chan := make(chan Thought)
-	//cmd := exec.Command("clear")
-	//cmd.Stdout = os.Stdout
-	//cmd.Run()
 
 	var debug = flag.Bool("d", false, "debug - whether to print copious what-i-m-doing messages")
 	flag.Parse()
@@ -35,13 +31,22 @@ func main() {
 	b.Debug = *debug
 	b.innit(&keywurds)
 
+	db, err := sql.Open("postgres", "user=thingie dbname=thingie sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
+	dbmap.AddTableWithName(Thing{}, "thing").SetKeys(true, "Id")
+	err = dbmap.CreateTablesIfNotExists()
+	checkErr(err, "Create tables failed")
+
 	l, err := net.Listen(CONN_TYPE, ":"+CONN_PORT)
 	if err != nil {
 		panic("Error Listening:" + err.Error())
 	}
 	conns := clientConns(l)
 	for {
-		go b.talkPerson(<-conns, keywurds)
+		go b.talkPerson(<-conns, keywurds, dbmap)
 	}
 }
 
@@ -49,7 +54,7 @@ func clientConns(l net.Listener) chan net.Conn {
 	ch := make(chan net.Conn)
 	i := 0
 	go func() {
-		fmt.Println("YAr, Chatbot Listening on " + CONN_HOST + ":" + CONN_PORT)
+		fmt.Println("\n\n*********\nYar, Chatbot Listening on " + CONN_HOST + ":" + CONN_PORT)
 		for {
 			conn, err := l.Accept()
 			if err != nil {
@@ -63,15 +68,3 @@ func clientConns(l net.Listener) chan net.Conn {
 	}()
 	return ch
 }
-
-//go b.listen(listen_chan)
-//go b.lowermind(mood_chan, neurons_chan)
-//go b.moody(mood_chan)
-//go b.uppermind(mood_chan, neurons_chan)
-//go b.talkPerson(bored_chan, listen_chan, mood_chan, neurons_chan, keywurds)
-
-//for {
-//	time.Sleep(60 * time.Second)
-//	//b.think(bored_chan, mood_chan, neurons_chan)
-//}
-
