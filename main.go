@@ -32,8 +32,10 @@ func main() {
 	b.innit(&keywurds)
 
 	db, err := sql.Open("postgres", "user=thingie dbname=thingie sslmode=disable")
+	err = db.Ping()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Is postgres running? ", err)
+		fmt.Println("Is postgrrs running?")
 	}
 	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
 	dbmap.AddTableWithName(Thing{}, "thing").SetKeys(true, "Id")

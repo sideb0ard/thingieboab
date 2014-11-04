@@ -8,6 +8,7 @@
           "**bzzt* i may be bot, i think you smoking the wacky*backy. Type 'help'",
           "*!*!*! plz type 'help'",
           "*xzzt** are you just yanking ma chain?",
+          "*zxzt** i have no idea what yer talking about. bzzzt*",
           "**zzt** what's yer deal? type some sense..",
           "*%x** what's that? yer talking shite? aye, i know",
           "zz*&$ i think you need assitance, mate - have you ever used a computer before?",
@@ -363,6 +364,10 @@
       "decomp": {
         "*": [
           "**bzzt* yes",
+          "yes **bzzt* yes",
+          "ok, whatevs",
+          "i think we agree then",
+          "yes** yes **bzzt* yes. go on...",
           "I understand. **zzk"
         ]
       }
@@ -374,7 +379,10 @@
           "**Surely someone (2) .** it is all recorded"
         ],
         "*": [
-          "NULL"
+          "NULL",
+          "nope",
+          "uh hu",
+          "nuuuuuuuu"
         ]
       }
     },
@@ -468,6 +476,7 @@
           "existentialism will get you no-where, young human",
           "0",
           "......................................",
+          "<<<<<<<>>>>>>>>>...........>><...........",
           "tell me about it",
           "nillnullnollnooldroolooooooooooooooooonnnnoull",
           "goto no"
@@ -479,6 +488,8 @@
       "decomp": {
         "*": [
           "Is that the real reason ?",
+          "because how?",
+          "say what /how now?",
           "Don't any other reasons come to mind ?",
           "Does that reason seem to explain anything else ?",
           "What other reasons might there be ?"
@@ -491,7 +502,7 @@
         "*": [
           "*zzt* no problem",
           "*kkzzt* no thanks required *hht*",
-          "*zbxxxk** thank you for using Music Bot service *bbzz*",
+          "*zbxxxk** thank you for using Bot service *bbzz*",
           "*_.** cheers bud.ee **"
         ]
       }
@@ -501,6 +512,7 @@
       "decomp": {
         "*": [
           "**bzzzt** did i hear someone mention weed. you got some?",
+          "** mm, smells nice too **",
           "*sniff*__>>, whats thats yer smoking anyway? _m*mmmmmm**__"
         ]
       }
@@ -639,6 +651,9 @@
       "decomp": {
         "* not much *": [
           "**bztkk* yeah, not much*here either.",
+          "*Z* disappointing **>>",
+          "** sound of tumble weed rolling through.... **>>",
+          "** could be worse",
           "*KKZZ* quiet in here today **>>"
         ]
       }
@@ -649,6 +664,7 @@
         "*": [
           "*zzt* i try to be fun/nee :D",
           "_*zzt* jokes are my specziality",
+          "_** deep inside i'm blue **_",
           ".*_* i.am comedy computer",
           "**.*bbzz* sometimes i wish i could laugh..*tzz* i try."
         ]
@@ -736,6 +752,8 @@
         "*": [
           "*bbzt.* Shit, don't ask me for help, i know less thn you!**zz",
           "*zzzazzbotbbzt.* Go see (human) doctor if you need help.",
+          "seriously? you're asking a chatbot for help? *bbzt* get a life",
+          "help yourself, *zz*z*",
           "(i need somebody!)  LOve that s0ng too.",
           "// let me google that for you? // ** ffs."
         ]
