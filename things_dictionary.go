@@ -21,11 +21,6 @@ type Thing struct {
 	//Memories      []interface{}
 }
 
-type Keywurds struct {
-	Keywords map[string]Decomp
-}
-
-type Decomp struct {
-	Score  int
-	Decomp map[string][]string
+type TransformReply struct {
+	Breakdown string
 }

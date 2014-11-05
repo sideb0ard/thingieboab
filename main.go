@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/coopernurse/gorp"
@@ -35,7 +36,6 @@ func main() {
 	err = db.Ping()
 	if err != nil {
 		log.Fatal("Is postgres running? ", err)
-		fmt.Println("Is postgrrs running?")
 	}
 	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
 	dbmap.AddTableWithName(Thing{}, "thing").SetKeys(true, "Id")
@@ -48,7 +48,7 @@ func main() {
 	}
 	conns := clientConns(l)
 	for {
-		go b.talkPerson(<-conns, dbmap)
+		go b.talkHandler(<-conns, dbmap)
 	}
 }
 
@@ -71,7 +71,7 @@ func clientConns(l net.Listener) chan net.Conn {
 	return ch
 }
 
-func (b Bot) talkPerson(conn net.Conn, dbmap *gorp.DbMap) {
+func (b Bot) talkHandler(conn net.Conn, dbmap *gorp.DbMap) {
 	bu := bufio.NewReader(conn)
 	p := &Thing{}
 
@@ -105,8 +105,17 @@ func (b Bot) talkPerson(conn net.Conn, dbmap *gorp.DbMap) {
 			fmt.Println("Errzzz reading :", err.Error())
 			break
 		}
-		reply := b.transform(string(line))
-		conn.Write([]byte("\n>" + reply + "\n"))
+		sentence := b.transform(string(line))
+		var s TransformReply
+		err = json.Unmarshal(sentence, &s)
+		if err != nil {
+			fmt.Println("Ooft, json not unmarshalling...")
+		}
+		wurds := strings.Split(s.Breakdown, " ")
+
+		fmt.Println("WURDS: ", wurds)
+		//resj := regexp.MustCompile()
+		conn.Write([]byte("\n>" + strings.Join(wurds, " // ") + "\n"))
 	}
 }
 
@@ -114,7 +123,7 @@ func (b Bot) dream() {
 	fmt.Println("electric sheepzzzzzzz")
 }
 
-func (b Bot) transform(s string) string {
+func (b Bot) transform(s string) []byte {
 	url := "http://localhost:5000/"
 	var jsonnn = "{\"wurds\": \"" + strings.TrimSpace(s) + "\"}"
 	fmt.Println(jsonnn)
@@ -134,6 +143,6 @@ func (b Bot) transform(s string) string {
 	fmt.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("response Body:", string(body))
-	return string(body)
+	return body
 
 }
