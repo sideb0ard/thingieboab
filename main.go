@@ -114,12 +114,13 @@ func (b Bot) talkHandler(conn net.Conn, dbmap *gorp.DbMap) {
 			fmt.Println("Ooft, json not unmarshalling...")
 		}
 		wurds := strings.Split(s.Breakdown, " ")
-		comprende(wurds)
+		subject, object := b.comprende(wurds)
 
-		//fmt.Println("SUBJ/OBJ: ", subject, " + ", object)
+		fmt.Println("SUBJ/OBJ: ", subject, " + ", object)
 		//fmt.Println("WURDS: ", wurds)
 		//resj := regexp.MustCompile()
-		conn.Write([]byte("\n>" + strings.Join(wurds, " // ") + "\n"))
+		//conn.Write([]byte("\n>" + strings.Join(wurds, " // ") + "\n"))
+		conn.Write([]byte("\n> Ha! you're talking about " + subject + " and " + object + "\n"))
 	}
 }
 
@@ -127,7 +128,7 @@ func (b Bot) dream() {
 	fmt.Println("electric sheepzzzzzzz")
 }
 
-func comprende(wurds []string) (s string, o string) {
+func (b Bot) comprende(wurds []string) (s string, o string) {
 	var sentence []Wurd
 	re, _ := regexp.Compile("([a-zA-Z0-9'-]+)/([A-Z0-9-]+)/([A-Z0-9-]+)/([A-Z0-9-]+)/([A-Z0-9-]+)/([A-Z0-9-]+)/([a-zA-Z0-9'-]+)")
 	for w := range wurds {
@@ -147,10 +148,22 @@ func comprende(wurds []string) (s string, o string) {
 			sentence = append(sentence, wobj)
 		}
 	}
-	for i := range sentence {
-		fmt.Println(sentence[i].String())
+	if b.Debug {
+		for i := range sentence {
+			fmt.Println(sentence[i].String())
+		}
 	}
-	return "subject", "object"
+	var sj, oj string
+	sre, _ := regexp.Compile("SBJ")
+	ore, _ := regexp.Compile("OBJ")
+	for w := range sentence {
+		if sre.MatchString(sentence[w].Role) {
+			sj = sentence[w].Name
+		} else if ore.MatchString(sentence[w].Role) {
+			oj = sentence[w].Name
+		}
+	}
+	return sj, oj
 }
 
 func (b Bot) transform(s string) []byte {
