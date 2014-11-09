@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 	"log"
 	"math/rand"
 	"regexp"
@@ -39,6 +39,11 @@ func tokenizer(bigstringy string) []string {
 		innertoke(strings.Join(stringies[i:], " "))
 	}
 	return tokenz
+}
+func isSubject(wurd string) bool {
+	sjre, _ := regexp.Compile("([a-zA-Z0-9]).*SBJ")
+	fmt.Println("%q\n", sjre.FindStringSubmatch(wurd))
+	return true
 }
 
 func spaceify(dashy string) string {

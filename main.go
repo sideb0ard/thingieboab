@@ -13,6 +13,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -73,32 +75,32 @@ func clientConns(l net.Listener) chan net.Conn {
 
 func (b Bot) talkHandler(conn net.Conn, dbmap *gorp.DbMap) {
 	bu := bufio.NewReader(conn)
-	p := &Thing{}
+	//p := &Thing{}
 
 	conn.Write([]byte(">** HUllo. I am " + b.Name + "\n"))
 
 	// first run - get some initial infozzzz...
-	if len(p.Name) == 0 {
-		conn.Write([]byte(">What is your name*?\n"))
-		line, err := bu.ReadBytes('\n')
-		if err != nil {
-			fmt.Println("Errzzz reading :", err.Error())
-		}
-		nom := strings.TrimSpace(string(line))
-		err = dbmap.SelectOne(p, "select * from thing where name=$1", nom)
-		if err != nil {
-			fmt.Println(nom, "doesnt exist - now creating..")
-			conn.Write([]byte("\n>Please to meet ya " + nom + ". Wha's up?\n"))
-			p.Name = nom
-			err = dbmap.Insert(p)
-			if err != nil {
-				fmt.Println("ERrrr inserting to DB:", err.Error())
-			}
-		} else {
-			fmt.Println("woop! exists")
-			conn.Write([]byte("\n>hey " + nom + ", I know you!. How are ya?\n"))
-		}
-	}
+	//if len(p.Name) == 0 {
+	//	conn.Write([]byte(">What is your name*?\n"))
+	//	line, err := bu.ReadBytes('\n')
+	//	if err != nil {
+	//		fmt.Println("Errzzz reading :", err.Error())
+	//	}
+	//	nom := strings.TrimSpace(string(line))
+	//	err = dbmap.SelectOne(p, "select * from thing where name=$1", nom)
+	//	if err != nil {
+	//		fmt.Println(nom, "doesnt exist - now creating..")
+	//		conn.Write([]byte("\n>Please to meet ya " + nom + ". Wha's up?\n"))
+	//		p.Name = nom
+	//		err = dbmap.Insert(p)
+	//		if err != nil {
+	//			fmt.Println("ERrrr inserting to DB:", err.Error())
+	//		}
+	//	} else {
+	//		fmt.Println("woop! exists")
+	//		conn.Write([]byte("\n>hey " + nom + ", I know you!. How are ya?\n"))
+	//	}
+	//}
 	for {
 		line, err := bu.ReadBytes('\n')
 		if err != nil {
@@ -112,8 +114,10 @@ func (b Bot) talkHandler(conn net.Conn, dbmap *gorp.DbMap) {
 			fmt.Println("Ooft, json not unmarshalling...")
 		}
 		wurds := strings.Split(s.Breakdown, " ")
+		comprende(wurds)
 
-		fmt.Println("WURDS: ", wurds)
+		//fmt.Println("SUBJ/OBJ: ", subject, " + ", object)
+		//fmt.Println("WURDS: ", wurds)
 		//resj := regexp.MustCompile()
 		conn.Write([]byte("\n>" + strings.Join(wurds, " // ") + "\n"))
 	}
@@ -123,10 +127,35 @@ func (b Bot) dream() {
 	fmt.Println("electric sheepzzzzzzz")
 }
 
+func comprende(wurds []string) (s string, o string) {
+	var sentence []Wurd
+	re, _ := regexp.Compile("([a-zA-Z0-9'-]+)/([A-Z0-9-]+)/([A-Z0-9-]+)/([A-Z0-9-]+)/([A-Z0-9-]+)/([A-Z0-9-]+)/([a-zA-Z0-9'-]+)")
+	for w := range wurds {
+		if re.MatchString(wurds[w]) {
+			tw := re.FindStringSubmatch(wurds[w])
+			id, _ := strconv.Atoi(tw[4])
+			anch, _ := strconv.Atoi(tw[6])
+			wobj := Wurd{
+				Name:   tw[1],
+				Tag:    tw[2],
+				Chunk:  tw[3],
+				Id:     id,
+				Role:   tw[5],
+				Anchor: anch,
+				Lemma:  tw[7],
+			}
+			sentence = append(sentence, wobj)
+		}
+	}
+	for i := range sentence {
+		fmt.Println(sentence[i].String())
+	}
+	return "subject", "object"
+}
+
 func (b Bot) transform(s string) []byte {
 	url := "http://localhost:5000/"
 	var jsonnn = "{\"wurds\": \"" + strings.TrimSpace(s) + "\"}"
-	fmt.Println(jsonnn)
 	var jsonStr = []byte(jsonnn)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("X-Sideb0ard-Service", "v1")
@@ -138,11 +167,14 @@ func (b Bot) transform(s string) []byte {
 		panic(err)
 	}
 	defer resp.Body.Close()
-
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("response Body:", string(body))
+
+	if b.Debug {
+		fmt.Println(jsonnn)
+		fmt.Println("response Status:", resp.Status)
+		fmt.Println("response Headers:", resp.Header)
+		fmt.Println("response Body:", string(body))
+	}
 	return body
 
 }

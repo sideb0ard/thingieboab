@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 type Thought struct {
 	Wurds string
 	Mood  int
@@ -23,4 +27,19 @@ type Thing struct {
 
 type TransformReply struct {
 	Breakdown string
+}
+
+type Wurd struct {
+	Name  string
+	Tag   string
+	Chunk string
+	Id    int
+	Role  string
+	//PNP    string
+	Anchor int
+	Lemma  string
+}
+
+func (w Wurd) String() string {
+	return fmt.Sprintf("<<%q %q %q %d %q %d %q>>", w.Name, w.Tag, w.Chunk, w.Id, w.Role, w.Anchor, w.Lemma)
 }
