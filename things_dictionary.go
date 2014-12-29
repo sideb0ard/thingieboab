@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 type Thought struct {
@@ -9,7 +10,18 @@ type Thought struct {
 	Mood  int
 }
 
-type Bot Thing
+type Event struct {
+	When time.Time
+	What string
+	Who  string
+	//Associations []Thing
+	//Source       Thing
+}
+
+type Bot struct {
+	Thing
+	CurrentStimulii []Event
+}
 
 type ThingType struct {
 	Id   int64
