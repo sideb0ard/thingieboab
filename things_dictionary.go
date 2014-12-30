@@ -13,9 +13,13 @@ type Thought struct {
 type Event struct {
 	When time.Time
 	What string
-	Who  string
+	Who  *Thing
 	//Associations []Thing
 	//Source       Thing
+}
+
+func (e Event) String() string {
+	return fmt.Sprintf("<<%s %s %s>>", e.When, e.What, e.Who.Name)
 }
 
 type Bot struct {
