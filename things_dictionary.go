@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"time"
+
+	"github.com/coopernurse/gorp"
 )
 
 type Thought struct {
@@ -25,6 +27,7 @@ func (e Event) String() string {
 type Bot struct {
 	Thing
 	CurrentStimulii []Event
+	Db              *gorp.DbMap
 }
 
 type ThingType struct {

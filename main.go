@@ -31,10 +31,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Is postgres running? ", err)
 	}
-	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
-	dbmap.AddTableWithName(ThingType{}, "thingType").SetKeys(true, "Id")
-	dbmap.AddTableWithName(Thing{}, "thing").SetKeys(true, "Id")
-	err = dbmap.CreateTablesIfNotExists()
+
+	b.Db = &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
+	b.Db.AddTableWithName(ThingType{}, "thingType").SetKeys(true, "Id")
+	b.Db.AddTableWithName(Thing{}, "thing").SetKeys(true, "Id")
+	err = b.Db.CreateTablesIfNotExists()
 	checkErr(err, "Create tables failed")
 
 	neurons := make(chan Thought)
@@ -47,9 +48,8 @@ func main() {
 	//go b.yinMind(neurons, memory)
 	//go b.yangMind(neurons, memory)
 
-	go b.storeMind(memory)
-
-	go b.netchat(dbmap, memory)
+	go b.memoryBus(memory)
+	go b.netchat(memory)
 
 	//initThought := Thought{"what am i, who am i, when am i", 100}
 	initThought := Thought{"I am not a number! I am a free man!", 100}

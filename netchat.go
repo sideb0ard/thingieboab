@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coopernurse/gorp"
 	_ "github.com/lib/pq"
 )
 
@@ -18,7 +17,7 @@ const (
 	CONN_TYPE = "tcp"
 )
 
-func (b *Bot) netchat(dbmap *gorp.DbMap, memory chan Event) {
+func (b *Bot) netchat(memory chan Event) {
 
 	l, err := net.Listen(CONN_TYPE, ":"+CONN_PORT)
 	if err != nil {
@@ -26,7 +25,7 @@ func (b *Bot) netchat(dbmap *gorp.DbMap, memory chan Event) {
 	}
 	conns := clientConns(l)
 	for {
-		go b.talkHandler(<-conns, dbmap, memory)
+		go b.talkHandler(<-conns, memory)
 	}
 
 }
@@ -50,7 +49,7 @@ func clientConns(l net.Listener) chan net.Conn {
 	return ch
 }
 
-func (b *Bot) talkHandler(conn net.Conn, dbmap *gorp.DbMap, memory chan Event) {
+func (b *Bot) talkHandler(conn net.Conn, memory chan Event) {
 	bu := bufio.NewReader(conn)
 	p := &Thing{}
 
@@ -65,25 +64,23 @@ func (b *Bot) talkHandler(conn net.Conn, dbmap *gorp.DbMap, memory chan Event) {
 		fmt.Println("Errzzz reading :", err.Error())
 	}
 	nom := strings.TrimSpace(string(line))
+	p.Name = nom
 
 	memory <- Event{time.Now(), "met", p}
 
-	err = dbmap.SelectOne(p, "select * from thing where name=$1", nom)
+	known, err := b.retrieveMemory(p)
 	if err != nil {
-		fmt.Println(nom, "doesnt exist - now creating..")
-		conn.Write([]byte("\n>Please to meet ya " + nom + ". Wha's up?\n"))
-		p.Name = nom
-		err = dbmap.Insert(p)
-		if err != nil {
-			fmt.Println("ERrrr inserting to DB:", err.Error())
-		}
-	} else {
-		fmt.Println("woop! exists")
+		fmt.Println("EERZZZ", err.Error())
+	}
+	fmt.Println("KNOWN::", known)
+	if len(known) > 0 {
 		conn.Write([]byte("\n>hey " + nom + ", I know you!. How are ya?\n"))
+	} else {
+		conn.Write([]byte("\n>Please to meet ya " + nom + ". Wha's up?\n"))
 	}
 
-	questionasked := false
-	var currentsubject string
+	//questionasked := false
+	//var currentsubject string
 	memory <- Event{time.Now(), "starting chat with", p}
 
 	for {
@@ -96,24 +93,18 @@ func (b *Bot) talkHandler(conn net.Conn, dbmap *gorp.DbMap, memory chan Event) {
 
 		memory <- Event{time.Now(), "asked question by", p}
 
-		sline := strings.TrimSpace(string(line))
-		if questionasked {
-			fmt.Println("QUESTION HAS BEEN ASKED - current subject is", currentsubject)
-			t := &Thing{}
-			err := dbmap.SelectOne(t, "select * from thing where name=$1", currentsubject)
-			fmt.Println("Ok, t is:", t)
-			if err == nil {
-				t.Properties = sline
-				count, err := dbmap.Update(t)
-				if err != nil {
-					fmt.Println("Beep! error inserting to DB:", err.Error())
-				}
-				fmt.Println("Updated ", count, " rows..")
-			} else {
-				fmt.Println("errrr:", err.Error())
-			}
-			questionasked = false
-		}
+		//	sline := strings.TrimSpace(string(line))
+		//	if questionasked {
+		//		fmt.Println("QUESTION HAS BEEN ASKED - current subject is", currentsubject)
+		//		t := &Thing{}
+		//		//retrieve <- *t
+		//		//known := <-remember
+		//		//if known == true {
+		//		//	t.Properties = sline
+		//		//	store <- *t
+		//		//}
+		//		questionasked = false
+		//	}
 		sentence := b.transform(string(line))
 		fmt.Println("SENTENCE", string(sentence))
 		var s TransformReply
@@ -130,22 +121,20 @@ func (b *Bot) talkHandler(conn net.Conn, dbmap *gorp.DbMap, memory chan Event) {
 		if len(subjects) > 0 {
 			for _, s := range subjects {
 				fmt.Println("Oh, yeah, ", s)
-				t := &Thing{}
-				err := dbmap.SelectOne(t, "select * from thing where name=$1", s)
-				if err != nil {
-					t.Name = s
-					t.Type = "person"
-					err = dbmap.Insert(t)
-					if err != nil {
-						fmt.Println("Beep! error inserting to DB:", err.Error())
-					}
-					conn.Write([]byte("\n>Who or what is a " + s + "?\n"))
-					currentsubject = s
-					questionasked = true
-				} else {
-					fmt.Println("I know it!")
-					conn.Write([]byte("\n>Oh yeah, " + s + " I know of this\n"))
-				}
+				//t := &Thing{}
+				//retrieve <- *t
+				//known := <-remember
+				//if known == false {
+				//	t.Name = s
+				//	t.Type = "person"
+				//	store <- *t
+				//	conn.Write([]byte("\n>Who or what is a " + s + "?\n"))
+				//	currentsubject = s
+				//	questionasked = true
+				//} else {
+				//	fmt.Println("I know it!")
+				//	conn.Write([]byte("\n>Oh yeah, " + s + " I know of this\n"))
+				//}
 			}
 
 		} else {
